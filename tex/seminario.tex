@@ -234,4 +234,49 @@
             }
         \end{figure}
     \end{frame}
+
+    \begin{frame}{Implementation of the clock condition}
+        \begin{lemma}
+            To guarantee that the system of clocks satisfies the clock condition we
+            need to obey the following implementation rules:
+            \begin{enumerate}
+                \item Each process \(P_i\) increments \(C_i\) between any two
+                successive events.
+                \item If event \(a\) is the sending of a message \(m\) by process
+                \(P_i\), then the message \(m\) contains a timestamp
+                \(T_m = C_i\langle a\rangle\).
+                \item Upon receiving a message \(m\), process \(P_j\) sets \(C_j\)
+                greater than or equal to its present value and greater than \(T_m\).
+            \end{enumerate}
+        \end{lemma}
+    \end{frame}
+
+    \begin{frame}{The ``\(\Rightarrow\)'' relation}
+        \begin{definition}[The ``\(\Rightarrow\)'' relation]
+            Let \(\prec\) be a total ordering on the processes. If \(a\) is an
+            event in process \(P_i\) and \(b\) is an event in process \(P_j\), then
+            \(a\Rightarrow b\) if and only if either
+            \begin{enumerate}
+                \item \(C_i\langle a\rangle < C_j\langle b\rangle\) or
+                \item \(C_i\langle a\rangle = C_j\langle b\rangle\) and
+                \(P_i\prec P_j\).
+            \end{enumerate}
+        \end{definition}
+    \end{frame}
+
+    \begin{frame}{A mutual exclusion problem}
+        A fixed collection of processes share a single resource, which can be used
+        by one process at a time. We want to find an algorithm that satisfies:
+        \begin{enumerate}
+            \item A process which has been granted the resource must release it before
+            it can be granted to another process.
+            \item Different requests for the resource must be granted in the order in
+            which they are made.
+            \item If every process which is granted the resource eventually releases
+            it, then every request is eventually granted.
+        \end{enumerate}
+    \end{frame}
+
+    \begin{frame}{A wrong solution}
+    \end{frame}
 \end{document}
