@@ -2,8 +2,14 @@
 
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage{tikz}
 
 \usetheme{Copenhagen}
+
+\usetikzlibrary{snakes}
+\tikzstyle{event}=[circle,fill=black!100,inner sep=0pt,minimum size=3pt]
+\tikzstyle{message}=[->,snake=coil,segment aspect=0,segment length=20pt]
+\tikzstyle{tick}=[draw=black!80,dashed]
 
 \title{Times, Clocks, and the Ordering of Events in a Distributed System}
 \author[Jacopo Notarstefano]{
@@ -15,5 +21,217 @@
 \begin{document}
     \begin{frame}[plain]
         \titlepage
+    \end{frame}
+
+    \begin{frame}{Main objective}
+        In this paper Lamport discusses the partial ordering defined by the
+        ``happened before'' relation, and gives a distributed algorithm for
+        extending it to a consistent total ordering of all the events.
+    \end{frame}
+
+    \begin{frame}{Distributed system}
+        \begin{definition}[Distributed system]
+            A \emph{distributed system} consists of a collection of distinct processes
+            which are spatially separated, and which communicate with one another
+            by exchanging messages.
+
+            A system is distributed if the message transmission delay is not
+            negligible compared to the time between events in a single process.
+        \end{definition}
+    \end{frame}
+
+    \begin{frame}{Examples of distributed systems}
+        \begin{itemize}
+            \item A worldwide network of interconnected computers
+            \item A cluster of workstation in a data center
+            \item Processes on a single computer
+        \end{itemize}
+    \end{frame}
+
+    \begin{frame}{The ``\(\rightarrow\)'' relation}
+        \begin{definition}[The ``\(\rightarrow\)'' relation]
+            The ``\(\rightarrow\)'' relation on the set of events of a system
+            is the smallest relation satisfying the following three conditions:
+            \begin{enumerate}
+                \item If \(a\) and \(b\) are events in the same process, and
+                \(a\) comes before \(b\), then \(a \rightarrow b\).
+                \item If \(a\) is the sending of a message by one process,
+                and \(b\) is the receipt of the same message by another
+                process, then \(a \rightarrow b\).
+                \item If \(a \rightarrow b\), and \(b \rightarrow c\), then
+                \(a \rightarrow c\).
+            \end{enumerate}
+        \end{definition} 
+    \end{frame}
+
+    \begin{frame}{The ``space-time diagram''}
+        \begin{figure}
+            \makebox[\textwidth][c]{
+              \begin{tikzpicture}
+                  \draw [->] (0,0.7) -- (0,7);
+                  \draw [->] (5,0.7) -- (5,7);
+                  \draw [->] (10,0.7) -- (10,7);
+
+                  \node (p1) at (0,1.5) [event,label=180:{$p_1$}] {};
+                  \node (p2) at (0,3) [event,label=180:{$p_2$}] {};
+                  \node (p3) at (0,4.5) [event,label=180:{$p_3$}] {};
+                  \node (p4) at (0,6) [event,label=180:{$p_4$}] {};
+
+                  \node (q1) at (5,1.5) [event,label=225:{$q_1$}] {};
+                  \node (q2) at (5,2.25) [event,label=0:{$q_2$}] {};
+                  \node (q3) at (5,3) [event,label=0:{$q_3$}] {};
+                  \node (q4) at (5,3.75) [event,label=180:{$q_4$}] {};
+                  \node (q5) at (5,4.5) [event,label=0:{$q_5$}] {};
+                  \node (q6) at (5,5.25) [event,label=0:{$q_6$}] {};
+                  \node (q7) at (5,6) [event,label=135:{$q_7$}] {};
+
+                  \node (r1) at (10,1.5) [event,label=0:{$r_1$}] {};
+                  \node (r2) at (10,3) [event,label=0:{$r_2$}] {};
+                  \node (r3) at (10,4.5) [event,label=0:{$r_3$}] {};
+                  \node (r4) at (10,6) [event,label=0:{$r_4$}] {};
+
+                  \draw [message] (p1) -- (q2);
+                  \draw [message] (q1) -- (p2);
+                  \draw [message] (q5) -- (p4);
+
+                  \draw [message] (q1) -- (r4);
+                  \draw [message] (q4) -- (r3);
+                  \draw [message] (r2) -- (q7);
+              \end{tikzpicture}
+            }
+        \end{figure}
+    \end{frame}
+
+    \begin{frame}{Clocks}
+        \begin{definition}[Clock]
+            For each process \(P_i\) we define a \emph{clock} \(C_i\) to be a
+            function that assigns a number \(C_i\langle a\rangle\) to
+            each event \(a\) in the process.
+        \end{definition}
+
+        \begin{definition}[System of clocks]
+            A \emph{system of clocks} is a function \(C\) that assigns to the
+            event \(b\) in process \(P_j\) the time \(C\langle b\rangle =
+            C_j\langle b\rangle\).
+        \end{definition}
+    \end{frame}
+
+    \begin{frame}{The clock condition}
+        \begin{definition}[The clock condition]
+            We say that a system of clocks satisfies the \emph{clock condition}
+            if, for any events \(a\) and \(b\), we have: if \(a\rightarrow b\)
+            then \(C\langle a\rangle < C\langle b\rangle\).
+        \end{definition}
+
+        \begin{lemma}
+            The clock condition is satisfied if the following conditions hold:
+            \begin{enumerate}
+                \item If \(a\) and \(b\) are events in process \(P_i\) and \(a\)
+                comes before \(b\), then \(C_i\langle a\rangle < C_i\langle b\rangle\).
+                \item If \(a\) is the sending of a message by process \(P_i\) and \(b\)
+                is the receipt of that message by process \(P_j\), then
+                \(C_i\langle a\rangle < C_i\langle b\rangle\).
+            \end{enumerate}
+        \end{lemma}
+    \end{frame}
+
+    \begin{frame}{The ``space-time diagram'', revisited}
+        \begin{figure}
+            \makebox[\textwidth][c]{
+              \begin{tikzpicture}
+                  \draw [->] (0,0.7) -- (0,7);
+                  \draw [->] (5,0.7) -- (5,7);
+                  \draw [->] (10,0.7) -- (10,7);
+
+                  \node (p1) at (0,1.5) [event,label=180:{$p_1$}] {};
+                  \node (p2) at (0,3) [event,label=180:{$p_2$}] {};
+                  \node (p3) at (0,4.5) [event,label=180:{$p_3$}] {};
+                  \node (p4) at (0,6) [event,label=180:{$p_4$}] {};
+
+                  \node (q1) at (5,1.5) [event,label=225:{$q_1$}] {};
+                  \node (q2) at (5,2.25) [event,label=0:{$q_2$}] {};
+                  \node (q3) at (5,3) [event,label=0:{$q_3$}] {};
+                  \node (q4) at (5,3.75) [event,label=180:{$q_4$}] {};
+                  \node (q5) at (5,4.5) [event,label=0:{$q_5$}] {};
+                  \node (q6) at (5,5.25) [event,label=0:{$q_6$}] {};
+                  \node (q7) at (5,6) [event,label=135:{$q_7$}] {};
+
+                  \node (r1) at (10,1.5) [event,label=0:{$r_1$}] {};
+                  \node (r2) at (10,3) [event,label=0:{$r_2$}] {};
+                  \node (r3) at (10,4.5) [event,label=0:{$r_3$}] {};
+                  \node (r4) at (10,6) [event,label=0:{$r_4$}] {};
+
+                  \draw [message] (p1) -- (q2);
+                  \draw [message] (q1) -- (p2);
+                  \draw [message] (q5) -- (p4);
+
+                  \draw [message] (q1) -- (r4);
+                  \draw [message] (q4) -- (r3);
+                  \draw [message] (r2) -- (q7);
+
+                  \draw [tick] (0,1.75) -- (10,1.75);
+                  \draw [tick] (0,2) -- (10,2);
+                  \draw [tick] (0,3.75) -- (5,2.5);
+                  \draw [tick] (5,2.5) -- (10,2.75);
+                  \draw [tick] (0,4.8) -- (5,2.75);
+                  \draw [tick] (5,2.75) -- (10,3.25);
+                  \draw [tick] (0,5.1) -- (5,3.25);
+                  \draw [tick] (5,3.25) -- (10,3.75);
+                  \draw [tick] (0,5.4) -- (5,4);
+                  \draw [tick] (5,4) -- (10,4.25);
+                  \draw [tick] (0,5.7) -- (5,4.75);
+                  \draw [tick] (5,4.75) -- (10,5.25);
+                  \draw [tick] (0,6.5) -- (5,5.5);
+                  \draw [tick] (5,5.5) -- (10,5.75);
+              \end{tikzpicture}
+            }
+        \end{figure}
+    \end{frame}
+
+    \begin{frame}{The ``space-time diagram'', rearranged}
+        \begin{figure}
+            \makebox[\textwidth][c]{
+              \begin{tikzpicture}
+                  \draw [->] (0,0.7) -- (0,7);
+                  \draw [->] (5,0.7) -- (5,7);
+                  \draw [->] (10,0.7) -- (10,7);
+
+                  \node (p1) at (0,1.15) [event,label=180:{$p_1$}] {};
+                  \node (p2) at (0,2.45) [event,label=180:{$p_2$}] {};
+                  \node (p3) at (0,3.15) [event,label=180:{$p_3$}] {};
+                  \node (p4) at (0,6) [event,label=180:{$p_4$}] {};
+
+                  \node (q1) at (5,1.15) [event,label=225:{$q_1$}] {};
+                  \node (q2) at (5,2.45) [event,label=0:{$q_2$}] {};
+                  \node (q3) at (5,3.85) [event,label=0:{$q_3$}] {};
+                  \node (q4) at (5,4.55) [event,label=180:{$q_4$}] {};
+                  \node (q5) at (5,5.25) [event,label=0:{$q_5$}] {};
+                  \node (q6) at (5,5.95) [event,label=0:{$q_6$}] {};
+                  \node (q7) at (5,6.65) [event,label=135:{$q_7$}] {};
+
+                  \node (r1) at (10,1.15) [event,label=0:{$r_1$}] {};
+                  \node (r2) at (10,3.15) [event,label=0:{$r_2$}] {};
+                  \node (r3) at (10,5.25) [event,label=0:{$r_3$}] {};
+                  \node (r4) at (10,6.65) [event,label=0:{$r_4$}] {};
+
+                  \draw [message] (p1) -- (q2);
+                  \draw [message] (q1) -- (p2);
+                  \draw [message] (q5) -- (p4);
+
+                  \draw [message] (q1) -- (r4);
+                  \draw [message] (q4) -- (r3);
+                  \draw [message] (r2) -- (q7);
+
+                  \draw [tick] (0,1.4) -- (10,1.4);
+                  \draw [tick] (0,2.1) -- (10,2.1);
+                  \draw [tick] (0,2.8) -- (10,2.8);
+                  \draw [tick] (0,3.5) -- (10,3.5);
+                  \draw [tick] (0,4.2) -- (10,4.2);
+                  \draw [tick] (0,4.9) -- (10,4.9);
+                  \draw [tick] (0,5.6) -- (10,5.6);
+                  \draw [tick] (0,6.3) -- (10,6.3);
+              \end{tikzpicture}
+            }
+        \end{figure}
     \end{frame}
 \end{document}
