@@ -158,6 +158,22 @@
         \end{lemma}
     \end{frame}
 
+    \begin{frame}{Implementation of the clock condition}
+        \begin{lemma}
+            To guarantee that a system of clocks satisfies the clock condition we
+            need to obey the following implementation rules:
+            \begin{enumerate}
+                \item Each process \(P_i\) increments \(C_i\) between any two
+                successive events.
+                \item If event \(a\) is the sending of a message \(m\) by process
+                \(P_i\), then the message \(m\) contains a timestamp
+                \(T_m = C_i\langle a\rangle\).
+                \item Upon receiving a message \(m\), process \(P_j\) sets \(C_j\)
+                greater than or equal to its present value and greater than \(T_m\).
+            \end{enumerate}
+        \end{lemma}
+    \end{frame}
+
     \begin{frame}{The space-time diagram, revisited}
         \begin{figure}
             \makebox[\textwidth][c]{
@@ -256,22 +272,6 @@
               \end{tikzpicture}
             }
         \end{figure}
-    \end{frame}
-
-    \begin{frame}{Implementation of the clock condition}
-        \begin{lemma}
-            To guarantee that a system of clocks satisfies the clock condition we
-            need to obey the following implementation rules:
-            \begin{enumerate}
-                \item Each process \(P_i\) increments \(C_i\) between any two
-                successive events.
-                \item If event \(a\) is the sending of a message \(m\) by process
-                \(P_i\), then the message \(m\) contains a timestamp
-                \(T_m = C_i\langle a\rangle\).
-                \item Upon receiving a message \(m\), process \(P_j\) sets \(C_j\)
-                greater than or equal to its present value and greater than \(T_m\).
-            \end{enumerate}
-        \end{lemma}
     \end{frame}
 
     \begin{frame}{The ``\(\Rightarrow\)'' relation}
@@ -417,7 +417,7 @@
             The algorithm described by rules \(1\) to \(5\) is a correct solution to the
             mutual exclusion problem.
         \end{theorem}
-        \begin{proof}[Proof (sketch).]
+        \begin{proof}[Proof (sketch)]
             The ordering is guaranteed by the fact that relation ``\(\Rightarrow\)''
             extends relation ``\(\rightarrow\)''.
         \end{proof}
