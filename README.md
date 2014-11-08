@@ -1,1 +1,3 @@
-# Seminario del corso Algoritmi Paralleli e Distribuiti, 2013/2014 #
+# Time, Clocks, and the Ordering of Events in a Distributed System #
+
+## Leslie Lamport ##
